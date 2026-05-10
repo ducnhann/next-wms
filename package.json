@@ -1,0 +1,29 @@
+{
+  "name": "next-wms",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "check": "biome check --write .",
+    "check-types": "turbo check-types",
+    "dev": "turbo -F web dev -F @wms/backend db:app:dev",
+    "dev:web": "turbo -F web dev",
+    "dev:backend": "turbo -F @wms/backend db:app:dev"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@types/node": "catalog:",
+    "tsdown": "^0.15.12",
+    "turbo": "^2.7.5"
+  },
+  "packageManager": "pnpm@10.28.0"
+}

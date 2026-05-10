@@ -1,0 +1,68 @@
+{
+  "name": "@wms/backend",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./auth": {
+      "types": "./auth/index.ts",
+      "default": "./auth/index.ts"
+    },
+    "./auth/handler": {
+      "types": "./auth/handler.ts",
+      "default": "./auth/handler.ts"
+    },
+    "./auth/schema": {
+      "types": "./auth/schema.ts",
+      "default": "./auth/schema.ts"
+    },
+    "./auth/db": {
+      "types": "./auth/db.ts",
+      "default": "./auth/db.ts"
+    },
+    "./lib/permissions": {
+      "types": "./lib/permissions.ts",
+      "default": "./lib/permissions.ts"
+    },
+    "./convex/_generated/api": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    },
+    "./convex/_generated/dataModel": {
+      "types": "./convex/_generated/dataModel.d.ts",
+      "default": "./convex/_generated/dataModel.js"
+    }
+  },
+  "scripts": {
+    "db:app:dev": "convex dev",
+    "db:app:setup": "convex dev --configure --until-success && convex dashboard",
+    "db:auth:generate": "drizzle-kit generate",
+    "db:auth:migrate": "drizzle-kit migrate",
+    "db:auth:push": "drizzle-kit push",
+    "db:auth:studio": "drizzle-kit studio",
+    "dev:email": "email dev -p 3001"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@react-email/components": "^1.0.4",
+    "@react-email/preview-server": "4.3.2",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "drizzle-kit": "^0.31.8",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-email": "4.3.2",
+    "tsx": "^4.21.0",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "better-auth": "catalog:",
+    "convex": "catalog:",
+    "drizzle-orm": "^0.45.0",
+    "resend": "^6.5.2"
+  }
+}
