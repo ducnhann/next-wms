@@ -180,7 +180,8 @@ export async function seedPurchaseOrderStatuses(t: TestConvex<any>) {
   const partial = await seedSystemLookup(t, "PurchaseOrderStatus", "PARTIAL", "Partial", 2);
   const completed = await seedSystemLookup(t, "PurchaseOrderStatus", "COMPLETED", "Completed", 3);
   const cancelled = await seedSystemLookup(t, "PurchaseOrderStatus", "CANCELLED", "Cancelled", 4);
-  return { pending, partial, completed, cancelled };
+  const received = await seedSystemLookup(t, "PurchaseOrderStatus", "RECEIVED", "Received", 5);
+  return { pending, partial, completed, cancelled, received };
 }
 
 // ─── Product + Variant ───────────────────────────────────────────────────────
@@ -273,3 +274,56 @@ export async function seedFullPOChain(t: TestConvex<any>) {
     poStatuses,
   };
 }
+
+// ─── Purchase Order with Details (for Receive Session tests) ─────────────────
+
+/**
+ * Creates a PO + PO details directly in DB.
+ * Used as a precondition for receive session tests.
+ * Does NOT call the mutation — just inserts the records.
+ */
+export async function seedPOWithDetails(
+  t: TestConvex<any>,
+  opts: {
+    orgId: any;
+    branchId: any;
+    supplierId: any;
+    userId: any;
+    statusId: any;
+    zoneId: any;
+    items: Array<{ variantId: any; quantity: number; unitCost?: number }>;
+    code?: string;
+  },
+) {
+  const poId = await t.run(async (ctx) => {
+    return await ctx.db.insert("purchase_orders", {
+      organizationId: opts.orgId,
+      branchId: opts.branchId,
+      code: opts.code ?? "PO-2026-05-001",
+      supplierId: opts.supplierId,
+      orderedAt: Date.now(),
+      expectedDeliveryAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      createdByUserId: opts.userId,
+      purchaseOrderStatusTypeId: opts.statusId,
+      isDeleted: false,
+    });
+  });
+
+  const detailIds: any[] = [];
+  for (const item of opts.items) {
+    const detailId = await t.run(async (ctx) => {
+      return await ctx.db.insert("purchase_order_details", {
+        purchaseOrderId: poId,
+        skuId: item.variantId,
+        quantityOrdered: item.quantity,
+        unitCost: item.unitCost ?? 100,
+        quantityReceived: 0,
+        recommendedZoneId: opts.zoneId,
+      });
+    });
+    detailIds.push(detailId);
+  }
+
+  return { poId, detailIds };
+}
+
