@@ -20,5 +20,5 @@
     "noEmit": true
   },
   "include": ["./**/*"],
-  "exclude": ["./_generated", "./__tests__"]
+  "exclude": ["./__tests__"]
 }
