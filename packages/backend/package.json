@@ -40,28 +40,33 @@
     "db:auth:migrate": "drizzle-kit migrate",
     "db:auth:push": "drizzle-kit push",
     "db:auth:studio": "drizzle-kit studio",
-    "dev:email": "email dev -p 3001"
+    "dev:email": "email dev -p 3001",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
     "@react-email/components": "^1.0.4",
     "@react-email/preview-server": "4.3.2",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "convex-test": "^0.0.52",
     "drizzle-kit": "^0.31.8",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-email": "4.3.2",
     "tsx": "^4.21.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.1.6"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "better-auth": "catalog:",
-    "convex": "catalog:",
+    "convex": "^1.38.0",
     "drizzle-orm": "^0.45.0",
     "resend": "^6.5.2"
   }
