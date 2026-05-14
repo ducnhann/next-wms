@@ -103,6 +103,7 @@ export async function seedBrand(
       organizationId,
       name: "Test Brand",
       isActive: true,
+      isDeleted: false,
       ...overrides,
     });
   });
