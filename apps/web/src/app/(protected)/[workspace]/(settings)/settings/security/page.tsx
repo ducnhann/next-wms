@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { MonitorSmartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react/jsx-runtime";
+import { ChangePasswordForm } from "@/components/settings/change-password-form";
 import {
   Setting,
   SettingHeader,
@@ -37,6 +38,12 @@ export default function SecurityPage() {
         description="Manage your security settings and active sessions"
       />
 
+      <SettingSection
+        title="Change Password"
+        description="Update your password. You'll need to enter your current password first."
+      >
+      <ChangePasswordForm />
+      </SettingSection>
       <SettingSection
         title="Sessions"
         description="Device logged into your account"
