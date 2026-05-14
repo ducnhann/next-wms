@@ -174,9 +174,12 @@ export default defineSchema({
     organizationId: v.string(),
     name: v.string(),
     isActive: v.boolean(),
+    isDeleted: v.boolean(),
+    deletedAt: v.optional(v.number()),
   })
     .index("organizationId", ["organizationId"])
-    .index("isActive", ["isActive"]),
+    .index("isActive", ["isActive"])
+    .index("isDeleted", ["isDeleted"]),
 
   products: defineTable({
     organizationId: v.id("organizations"),

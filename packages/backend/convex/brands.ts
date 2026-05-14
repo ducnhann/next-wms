@@ -41,6 +41,9 @@ export const getPaginatedBrands = query({
           )
       : ctx.db.query("brands");
 
+    // Filter out deleted brands
+    query = query.filter((q) => q.eq(q.field("isDeleted"), false));
+
     // Filter by active status if provided
     if (isActive !== undefined) {
       query = query.filter((q) => q.eq(q.field("isActive"), isActive));
@@ -60,7 +63,7 @@ export const get = query({
   },
   handler: async (ctx, args) => {
     const brand = await ctx.db.get(args.id);
-    if (!brand) {
+    if (!brand || brand.isDeleted) {
       throw new Error("Brand not found");
     }
     return brand;
@@ -83,6 +86,9 @@ export const listAll = query({
       .withIndex("organizationId", (q) =>
         q.eq("organizationId", organizationId),
       );
+
+    // Filter out deleted brands
+    query = query.filter((q) => q.eq(q.field("isDeleted"), false));
 
     if (isActive !== undefined) {
       query = query.filter((q) => q.eq(q.field("isActive"), isActive));
@@ -109,6 +115,9 @@ export const listBrandsWithProductCount = query({
       .withIndex("organizationId", (q) =>
         q.eq("organizationId", organizationId),
       );
+
+    // Filter out deleted brands
+    brandsQuery = brandsQuery.filter((q) => q.eq(q.field("isDeleted"), false));
 
     if (isActive !== undefined) {
       brandsQuery = brandsQuery.filter((q) =>
@@ -160,7 +169,10 @@ export const createBrand = mutation({
       .withIndex("organizationId", (q) =>
         q.eq("organizationId", organizationId),
       )
-      .filter((q) => q.eq(q.field("name"), name))
+      .filter((q) => q.and(
+        q.eq(q.field("name"), name),
+        q.eq(q.field("isDeleted"), false)
+      ))
       .first();
 
     if (existing) {
@@ -171,6 +183,7 @@ export const createBrand = mutation({
       organizationId,
       name,
       isActive,
+      isDeleted: false,
     });
 
     // Log audit for brand creation
@@ -203,7 +216,7 @@ export const updateBrand = mutation({
     const { id, name, isActive } = args;
 
     const brand = await ctx.db.get(id);
-    if (!brand) {
+    if (!brand || brand.isDeleted) {
       throw new Error("Brand not found");
     }
 
@@ -216,7 +229,10 @@ export const updateBrand = mutation({
         .withIndex("organizationId", (q) =>
           q.eq("organizationId", brand.organizationId),
         )
-        .filter((q) => q.eq(q.field("name"), name))
+        .filter((q) => q.and(
+          q.eq(q.field("name"), name),
+          q.eq(q.field("isDeleted"), false)
+        ))
         .first();
 
       if (existing) {
@@ -248,9 +264,8 @@ export const updateBrand = mutation({
 });
 
 /**
- * DELETE - Hard delete a brand (use with caution!)
+ * DELETE - Soft delete a brand
  * Permission required: brands:delete
- * Note: This is hard delete. Consider using isActive=false for soft delete.
  */
 export const deleteBrand = mutation({
   args: {
@@ -262,10 +277,16 @@ export const deleteBrand = mutation({
     const { brandId } = args;
     const id = brandId as Id<"brands">;
 
+    const brand = await ctx.db.get(id);
+    if (!brand || brand.isDeleted) {
+      throw new Error("Brand not found");
+    }
+
     // Check if brand has products
     const hasProducts = await ctx.db
       .query("products")
       .withIndex("brandId", (q) => q.eq("brandId", id))
+      .filter((q) => q.eq(q.field("isDeleted"), false))
       .first();
 
     if (hasProducts) {
@@ -274,16 +295,21 @@ export const deleteBrand = mutation({
       );
     }
 
-    // Log audit for brand deletion before deleting
+    // Soft delete
+    await ctx.db.patch(id, {
+      isDeleted: true,
+      deletedAt: Date.now(),
+    });
+
+    // Log audit for brand deletion
     await logCRUDAction(ctx, {
-      organizationId: id as unknown as Id<"organizations">, // brands table uses string organizationId
+      organizationId: brand.organizationId as unknown as Id<"organizations">,
       action: "DELETE",
       entityType: "brands",
       entityId: brandId,
-      notes: `Hard deleted brand`,
+      notes: `Soft deleted brand "${brand.name}"`,
     });
 
-    await ctx.db.delete(id);
     return { success: true };
   },
 });
@@ -341,7 +367,10 @@ export const search = query({
       .withIndex("organizationId", (q) =>
         q.eq("organizationId", organizationId),
       )
-      .filter((q) => q.eq(q.field("isActive"), true))
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("isDeleted"), false)
+      ))
       .collect();
 
     // Simple case-insensitive search
