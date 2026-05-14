@@ -101,9 +101,19 @@ describe("UC08: Edit Organization", () => {
   it("[BR37] ORG-019: Rejects update for missing org", async () => {
     const t = convexTest(schema, modules);
 
+    const orgId = await seedOrganization(t, {
+      name: "Temp Org",
+      slug: "temp-org",
+      authId: "ba-org-temp",
+    });
+
+    await t.run(async (ctx) => {
+      await ctx.db.delete(orgId);
+    });
+
     await expect(
       t.mutation(api.authSync.updateOrganization, {
-        id: "org:missing" as any,
+        id: orgId,
         name: "No Org",
       }),
     ).rejects.toThrow("Organization not found");
