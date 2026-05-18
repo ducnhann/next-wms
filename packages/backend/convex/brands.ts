@@ -290,9 +290,7 @@ export const deleteBrand = mutation({
       .first();
 
     if (hasProducts) {
-      throw new Error(
-        "Cannot delete brand that has products. Remove products first or deactivate the brand.",
-      );
+      throw new Error("cannot delete brand with existing product.");
     }
 
     // Soft delete

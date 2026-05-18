@@ -238,9 +238,31 @@ function ActionsCell({ brand }: { brand: BrandWithProductCount }) {
     mutationFn: useConvexMutation(api.brands.deactivateBrand),
   });
 
+  const { mutate: deleteBrand } = useMutation({
+    mutationFn: useConvexMutation(api.brands.deleteBrand),
+  });
+
   const { mutate: updateBrand } = useMutation({
     mutationFn: useConvexMutation(api.brands.updateBrand),
   });
+
+  const handleDelete = () => {
+    if (!confirm(`Are you sure you want to delete "${brand.name}"?`)) return;
+
+    deleteBrand(
+      { brandId: brand._id },
+      {
+        onSuccess: () => {
+          toast.success(`Brand "${brand.name}" deleted`);
+        },
+        onError: (error) => {
+          toast.error(
+            error instanceof Error ? error.message : "Failed to delete brand",
+          );
+        },
+      },
+    );
+  };
 
   const handleDeactivate = () => {
     deactivate(
@@ -289,6 +311,12 @@ function ActionsCell({ brand }: { brand: BrandWithProductCount }) {
               Edit name
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={handleDelete}
+            >
+              Delete
+            </DropdownMenuItem>
             {brand.isActive ? (
               <DropdownMenuItem
                 className="text-destructive"
